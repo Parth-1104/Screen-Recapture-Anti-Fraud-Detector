@@ -1,0 +1,17 @@
+# Virtual Environment
+spoof-env/
+
+# Python caching
+__pycache__/
+*.pyc
+
+# Hidden system files
+.DS_Store
+
+# Temporary local testing files (Optional but recommended)
+check_values.py
+optimize.py
+*.heic
+
+real/
+screen/
