@@ -12,6 +12,11 @@ LINK to DEMO VIDEO :  https://youtu.be/H04HJqm6ObM
   * *Honesty Note on Overfitting:* While the MobileNetV3 feature extractor combined with a linear decision boundary achieved a perfect 100% score on our local dataset, a sample size of 69 images across 5 distinct objects introduces a high risk of variance overfitting. On a completely unseen, heterogeneous test suite, performance will naturally normalize toward the 95%+ target threshold as new environmental variables are introduced.
   
 * **Latency:** `~14 ms per image` on [MacBook M1 - silicon chip-8GB].
+
+### Real-World Edge Case Handling & Robustness
+* **The Compression/Texture Vulnerability:** During testing, high-frequency natural textures (e.g., distant foliage) or digital compression artifacts (e.g., images downloaded from shared cloud drives with heavy JPEG quantization blocks) can mimic sub-pixel screen aliasing, causing false positives on legitimate images.
+* **Future Mitigation Strategy:** To decouple digital compression noise from actual screen Moiré patterns, I would integrate a **Blur/Laplacian Variance check** and expand the training distribution using data-augmentation techniques like Random JPEG Compression, Gaussian Noise injection, and adversarial high-frequency filtering.
+  
 ### Cost Per Image & Scale Economics
 * **Total Provider Compute Cost:** `$0.00` (**On-Device Client Execution**)
 * **Scaling Architecture Assumptions:** By compiling the pipeline down to an optimized **ONNX Runtime footprint (<50MB)**, the 576-dimensional tensor operations execute entirely locally within the client's runtime environment. By utilizing native hardware acceleration bindings (**CoreML** on iOS / **NNAPI** on Android), the execution passes directly to the user's mobile device CPU/NPU. 
