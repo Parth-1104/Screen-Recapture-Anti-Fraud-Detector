@@ -67,11 +67,9 @@ The fraud signal lives entirely in the subtle, low-level micro-textures: **Moir�
               < 0.25       /    \       ≥ 0.25
              ┌────────────┘      └────────────┐
              │                                │
-             ▼                                ▼
-   ┌───────────────────┐            ┌───────────────────┐
-   │  🟢 REAL OBJECT   │            │ 🔴 SPOOF ATTEMPT  │
-   │   (Pass Pipeline) │            │ (Reject / Flag)   │
-   └───────────────────┘            └───────────────────┘
+             ▼ 
+             🟢 REAL OBJECT                  🔴 SPOOF ATTEMPT  
+
 
 ### 🔍 Feature Extraction
 Images are normalized to a uniform grid resolution and passed through a mobile-optimized **MobileNetV3-Small** structural backbone. The final dense layer is dropped to extract 576-dimensional continuous feature spaces mapping micro-textures and specular dispersion.
