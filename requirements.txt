@@ -1,6 +1,9 @@
 torch
 torchvision
 scikit-learn
-opencv-python
+opencv-python-headless
 numpy
 Pillow
+fastapi
+uvicorn
+python-multipart
