@@ -2,6 +2,8 @@
 
 A production-grade, lightweight edge-AI pipeline built to differentiate between real physical objects and digital display recaptures (photo-of-a-screen spoofing attempts).
 
+LINK to DEMO VIDEO :  https://youtu.be/H04HJqm6ObM
+
 ---
 
 ## 📊 Core Performance Metrics
@@ -13,14 +15,22 @@ A production-grade, lightweight edge-AI pipeline built to differentiate between 
 * **Cost Per Image:** `$0.00 (On-Device Client Execution)`.
   * *Cost Assumption:* This architecture runs entirely local to the runtime environment using lightweight tensor operations. By compiling down to CoreML, TFLite, or TorchScript, the execution passes directly to the user's mobile device CPU/NPU. This completely scales away cloud infrastructure server bills, API maintenance overhead, and wide network latency blocks.
 
+
+
 ---
 
-## 🧠 Technical Approach & Engineering Logic
+## 🧠 Technical Implementation ("How I Did It")
 
-What makes this problem incredibly unique is that **there is no specific object to "recognize."** Standard Vision models look for high-level semantic structures (e.g., "human face," "passport document"), which completely fail in anti-spoofing because a photo of an ID card and a photo of a *screen displaying that same ID card* share identical objects. 
+* **Architecture**: Built a lightweight edge-AI pipeline using a mobile-optimized MobileNetV3-Small backbone.
 
-The fraud signal lives entirely in the subtle, low-level micro-textures: **Moiré patterns, sub-pixel grid aliasing, screen glare, and specular chromatic distortion.** You cannot simply throw this at a standard generative LLM chatbot and trust the answer; it requires building a real spatial noise analyzer.
+* **Feature Extraction**: Dropped the final classification head to extract a 576-dimensional continuous feature vector capturing sub-pixel spatial frequencies, Moiré patterns, and micro-textures rather than high-level semantic objects.
 
+* **Classification**: Passed embeddings into a regularized linear decision boundary acting as a fast separating hyperplane.
+
+* **Framework**: Compiled the entire pipeline to ONNX Runtime to bypass heavy framework overhead, stripping the runtime memory footprint to under 50MB for native C++ execution speeds.
+
+* Choosing the Cut-off Score for Flagging
+Rather than relying on a naive static $0.5$ midpoint, the decision threshold must be strictly calibrated via an empirical Precision-Recall Receiver Operating Characteristic (ROC) curve.For an identity/onboarding fraud system, we prioritize an asymmetric cost function where False Positives (blocking a legitimate user) must be minimized ($<0.5\%$), while maintaining an aggressive wall against False Negatives.Based on validation distribution variance, the operational cutoff threshold is locked tightly at $0.25$. Any image yielding a score $\ge 0.25$ is flagged as a spoof attempt.
 ### Execution Flowchart
 
                ┌───────────────────────────┐
@@ -71,15 +81,11 @@ The fraud signal lives entirely in the subtle, low-level micro-textures: **Moir�
              🟢 REAL OBJECT                  🔴 SPOOF ATTEMPT  
 
 
-### 🔍 Feature Extraction
-Images are normalized to a uniform grid resolution and passed through a mobile-optimized **MobileNetV3-Small** structural backbone. The final dense layer is dropped to extract 576-dimensional continuous feature spaces mapping micro-textures and specular dispersion.
 
-### ⚖️ Classification Plane
-A localized regularized classifier acts as a fast linear separating hyper-plane, determining spatial noise frequencies and display-glass edge boundaries instantly.
 
 ---
 
-## ⚡ Edge Optimization: Making it Tiny & Fast for Mobile
+## ⚡ : Making it Tiny & Fast for Mobile
 To transition this from a Python script into a production mobile app that doesn't melt a phone's battery or trigger out-of-memory (OOM) crashes:
 
 * **The ONNX Engine Switch:** Instead of shipping heavy PyTorch or TensorFlow frameworks (~450MB+ footprint), the backbone is compiled into an **ONNX Runtime** instance. This drops the runtime framework memory footprint to **under 50MB** and ensures native C++ execution speeds on the device CPU.
